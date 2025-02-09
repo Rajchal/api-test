@@ -25,7 +25,7 @@ def home():
 @app.route('/display')
 def display_question():
     """Page for students to see the latest question"""
-    return render_template('display.html', question=current_question)
+    return current_question
 
 # Endpoint to receive commands from mobile
 @app.route('/command', methods=['POST'])

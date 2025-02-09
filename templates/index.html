@@ -3,17 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Teacher's Screen</title>
-    <script>
-        async function fetchQuestion() {
-            const response = await fetch("/display");
-            document.getElementById("question").innerText = await response.text();
-        }
-        setInterval(fetchQuestion, 2000);  // Refresh every 2 seconds
-    </script>
+    <title>Home</title>
 </head>
 <body>
-    <h1>Current Question:</h1>
-    <h2 id="question">{{ question }}</h2>
+    <h1>Raspberry Pi is running ... </h1>
 </body>
 </html>

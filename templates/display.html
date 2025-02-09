@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-7">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student's Screen</title>
     <script>
@@ -9,7 +9,7 @@
             const response = await fetch("/display");
             document.getElementById("question").innerText = await response.text();
         }
-        setInterval(updateQuestion, 2000);  // Refresh every 2 seconds
+       updateQuestion();  // Refresh every 2 seconds
     </script>
 </head>
 <body>
