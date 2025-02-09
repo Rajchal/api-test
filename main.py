@@ -1,40 +1,56 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 import os
 
 app = Flask(__name__)
 
-# Allow CORS (for mobile app access)
+# Allow CORS for mobile access
 from flask_cors import CORS
 CORS(app)
 
+# Store the current question
+current_question = "Welcome! Waiting for the first question..."
+
+# Store student answers (mock data, replace with a database)
+student_answers = {
+    "student1": "A",
+    "student2": "B",
+    "student3": "C"
+}
+
 @app.route('/')
 def home():
-    return jsonify({"message": "Raspberry Pi API is running!"})
+    """Home page showing the current question"""
+    return render_template('index.html', question=current_question)
+
+@app.route('/display')
+def display_question():
+    """Page for students to see the latest question"""
+    return render_template('display.html', question=current_question)
 
 # Endpoint to receive commands from mobile
 @app.route('/command', methods=['POST'])
 def receive_command():
-    data = request.get_json()
+    global current_question
 
+    data = request.get_json()
     if not data or 'action' not in data:
         return jsonify({"error": "Invalid request"}), 400
 
     action = data['action']
-    
-    # Example: Change questions on the projector
+
+    # Change the displayed question
     if action == "change_question":
-        question = data.get('question', 'No question provided')
-        print(f"Changing question to: {question}")
-        return jsonify({"status": "Question updated", "question": question})
+        current_question = data.get('question', 'No question provided')
+        print(f"Changing question to: {current_question}")
+        return jsonify({"status": "Question updated", "question": current_question})
 
-    # Example: View answers
+    # View student answers
     elif action == "view_answers":
-        answers = {"student1": "A", "student2": "B", "student3": "C"}  # Example data
-        return jsonify({"status": "Success", "answers": answers})
+        return jsonify({"status": "Success", "answers": student_answers})
 
-    # Example: Restart the Raspberry Pi
+    # Restart Raspberry Pi
     elif action == "restart":
-        os.system("sudo reboot")  # ⚠️ Only use if you need to reboot the Pi
+        os.system("sudo reboot")  # ⚠️ Be careful using this!
         return jsonify({"status": "Raspberry Pi is restarting..."})
 
     else:
