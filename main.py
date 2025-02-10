@@ -52,7 +52,7 @@ def receive_command():
     elif action == "restart":
         os.system("sudo reboot")  # ⚠️ Be careful using this!
         return jsonify({"status": "Raspberry Pi is restarting..."})
-    elif  data['action'] == "button_pressed":
+    elif  action == "button_pressed":
         button = data.get('button', 'Unknown')
         print(f"Button {button} pressed on ESP32")
         return jsonify({"status": "Button received", "button": button})
