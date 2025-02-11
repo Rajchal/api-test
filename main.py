@@ -25,7 +25,7 @@ def home():
 @app.route('/display')
 def display_question():
     """Page for students to see the latest question"""
-    return current_question
+    return render_template('display.html', question=current_question)
 
 @app.route('/answers')
 def display_answers():
