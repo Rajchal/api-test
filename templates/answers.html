@@ -9,8 +9,7 @@
             const response = await fetch("/display");
             document.getElementById("question").innerText = await response.text();
         }
-        setTimeout(updateQuestion, 1000)
-     
+       updateQuestion();  // Refresh every 2 seconds
     </script>
 </head>
 <body>
