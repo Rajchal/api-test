@@ -36,6 +36,7 @@ def display_answers():
 @app.route('/command', methods=['POST'])
 def receive_command():
     global current_question
+    global student_answers
 
     data = request.get_json()
     if not data or 'action' not in data:
@@ -62,6 +63,7 @@ def receive_command():
         student = button.split(',')
         but=student[0]
         stu=student[1]
+        student_answers[stu]=but
         print(f"Button {but} pressed by student {stu}")
         return jsonify({"status": "Button received", "button": button})
     else:
