@@ -58,10 +58,10 @@ def receive_command():
         return jsonify({"status": "Raspberry Pi is restarting..."})
     elif  action == "button_pressed":
         button = data.get('button', 'Unknown')
-        # student = button.split(',')
-        # but=student[0]
-        # stu=student[1]
-        print(f"Button {button}")
+        student = button.split(',')
+        but=student[0]
+        stu=student[1]
+        print(f"Button {but} pressed by student {stu}")
         return jsonify({"status": "Button received", "button": button})
     else:
         return jsonify({"error": "Unknown command"}), 400
