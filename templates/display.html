@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-7">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="refresh" content="10">
     <title>Student's Screen</title>
     <script>
         async function updateQuestion() {
@@ -10,7 +11,7 @@
             const response = await fetch("/display");
             document.getElementById("question").innerText = await response.text();
         }
-        setInterval(()=>updateQuestion, 1000)
+        setInterval(updateQuestion, 1000)
      
     </script>
 </head>
