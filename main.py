@@ -8,7 +8,7 @@ from flask_cors import CORS
 CORS(app)
 
 # Store the current question
-current_question = "Welcome!<br> Waiting for the first question..."
+current_question = "Welcome! Waiting for the first question..."
 
 # Store student answers (mock data, replace with a database)
 student_answers = {
@@ -25,6 +25,8 @@ def home():
 @app.route('/display')
 def display_question():
     """Page for students to see the latest question"""
+    curr= current_question.split(',')
+    temp=curr[0]+'<br> 1.'+curr[1]+'<br> 2.'+curr[2]+'<br> 3.'+curr[3]+'<br> 4.'+curr[4]
     return current_question
 
 @app.route('/answers')
