@@ -12,9 +12,9 @@ current_question = "Welcome! Waiting for the first question..."
 
 # Store student answers (mock data, replace with a database)
 student_answers = {
-    "student1": "A",
-    "student2": "B",
-    "student3": "C"
+    "student-1": "A",
+    "student-2": "B",
+    "student-3": "C"
 }
 
 @app.route('/')
@@ -26,6 +26,10 @@ def home():
 def display_question():
     """Page for students to see the latest question"""
     return current_question
+
+@app.route('/answers')
+def display_answers():
+    return student_answers
 
 # Endpoint to receive commands from mobile
 @app.route('/command', methods=['POST'])
@@ -50,14 +54,14 @@ def receive_command():
 
     # Restart Raspberry Pi
     elif action == "restart":
-        os.system("sudo reboot")  # ⚠️ Be careful using this!
+        os.system("sudo reboot")  
         return jsonify({"status": "Raspberry Pi is restarting..."})
     elif  action == "button_pressed":
         button = data.get('button', 'Unknown')
         # student = button.split(',')
         # but=student[0]
         # stu=student[1]
-        print(f"Button {button} pressed on ")
+        print(f"Button {button}")
         return jsonify({"status": "Button received", "button": button})
     else:
         return jsonify({"error": "Unknown command"}), 400
