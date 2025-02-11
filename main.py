@@ -12,9 +12,7 @@ current_question = "Welcome! Waiting for the first question..."
 
 # Store student answers (mock data, replace with a database)
 student_answers = {
-    "student-1": "A",
-    "student-2": "B",
-    "student-3": "C"
+   
 }
 
 @app.route('/')
