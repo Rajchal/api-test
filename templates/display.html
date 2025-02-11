@@ -7,17 +7,27 @@
     <title>Student's Screen</title>
     <script>
         async function updateQuestion() {
-            location.reload();
+   
             const response = await fetch("/display");
-            document.getElementById("question").innerText = await response.text();
-            setTimeout(updateQuestion, 1000)
+            const list=await response.text().split(',');
+            document.getElementById("question").innerText = list[0];
+            document.getElementById("option1").innerText = list[1];
+            document.getElementById("option2").innerText = list[2];
+            document.getElementById("option3").innerText = list[3];
+            document.getElementById("option4").innerText = list[4];
+
         }
-        setInterval(updateQuestion, 1000)
+
+        updateQuestion
      
     </script>
 </head>
 <body>
     <h1>Question:</h1>
     <h2 id="question">{{ question }}</h2>
+    <h2 id="option1">{{ option1 }}</h2>
+    <h2 id="option2">{{ option2 }}</h2>
+    <h2 id="option3">{{ option3 }}</h2>
+    <h2 id="option4">{{ option4 }}</h2>
 </body>
 </html>
