@@ -25,8 +25,7 @@ def home():
 @app.route('/display')
 def display_question():
     """Page for students to see the latest question"""
-    curr= current_question.split(',')
-    temp=curr[0]+'<br> 1.'+curr[1]+'<br> 2.'+curr[2]+'<br> 3.'+curr[3]+'<br> 4.'+curr[4]
+    current_question.replace(',','<br>')
     return current_question
 
 @app.route('/answers')
