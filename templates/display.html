@@ -6,6 +6,7 @@
     <title>Student's Screen</title>
     <script>
         async function updateQuestion() {
+            location.reload();
             const response = await fetch("/display");
             document.getElementById("question").innerText = await response.text();
         }
