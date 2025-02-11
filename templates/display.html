@@ -10,7 +10,7 @@
             const response = await fetch("/display");
             document.getElementById("question").innerText = await response.text();
         }
-        setTimeout(updateQuestion, 1000)
+        setInterval(updateQuestion, 1000)
      
     </script>
 </head>
