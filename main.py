@@ -55,7 +55,7 @@ def receive_command():
     elif  action == "button_pressed":
         button = data.get('button', 'Unknown')
         student = data.get('student','Unknown')
-        print(f"Button {button} pressed on ESP32")
+        print(f"Button {button} pressed on {student}")
         return jsonify({"status": "Button received", "button": button,"student":student})
     else:
         return jsonify({"error": "Unknown command"}), 400
