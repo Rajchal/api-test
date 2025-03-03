@@ -3,17 +3,32 @@
 <head>
     <meta charset="UTF-7">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="refresh" content="10">
     <title>Student's Screen</title>
     <script>
         async function updateQuestion() {
+   
             const response = await fetch("/display");
-            document.getElementById("question").innerText = await response.text();
+            const list=await response.text().split(',');
+            console.log(list);
+            document.getElementById("question").innerText = list[0];
+            document.getElementById("option1").innerText = list[1];
+            document.getElementById("option2").innerText = list[2];
+            document.getElementById("option3").innerText = list[3];
+            document.getElementById("option4").innerText = list[4];
+
         }
-       updateQuestion();  // Refresh every 2 seconds
+
+        updateQuestion
+     
     </script>
 </head>
 <body>
     <h1>Question:</h1>
-    <h2 id="question">{{ question }}</h2>
+    <h2 id="question"></h2><br>
+    <h2 id="option1"></h2><br>
+    <h2 id="option2"></h2><br>
+    <h2 id="option3"></h2><br>
+    <h2 id="option4"></h2>
 </body>
 </html>
