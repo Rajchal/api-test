@@ -87,7 +87,7 @@ def get_answers():
 @app.route('/get_chapters',methods=['GET'])
 def get_chapters():
     try:
-        return questions_data
+        return jsonify({list:[{"chapter":"Astronomy","questions":[]}]})
     except Exception as e:
         return jsonify({"error":str(e)}),500
 # Render the webpage to show questions and answers
