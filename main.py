@@ -18,17 +18,9 @@ def upload_questions():
         # Receive JSON from teacher
         data = request.get_json()
 
-<<<<<<< HEAD
         # Validate if data contains chapter and questions
         if 'chapter' not in data or 'questions' not in data:
             return jsonify({"error": "Invalid data format"}), 400
-=======
-# Store student answers (mock data, replace with a database)
-student_answers = {
-   
-}
->>>>>>> refs/remotes/origin/main
-
         chapter_name = data['chapter']
         questions = data['questions']
 
@@ -97,7 +89,7 @@ def get_chapters():
     try:
         return "lato sachet"
     except Exception as e:
-        returb jsonify({"error":str(e)}),500
+        return jsonify({"error":str(e)}),500
 # Render the webpage to show questions and answers
 @app.route('/')
 def index():
@@ -106,8 +98,6 @@ def index():
 def ans():
     return student_answers
 
-<<<<<<< HEAD
-=======
 @app.route('/display')
 def display_question():
     """Page for students to see the latest question"""
@@ -156,7 +146,6 @@ def receive_command():
         return jsonify({"error": "Unknown command"}), 400
 
 # Run API on local network
->>>>>>> refs/remotes/origin/main
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
 
