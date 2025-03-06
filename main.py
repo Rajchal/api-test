@@ -1,11 +1,28 @@
 from flask import Flask, request, jsonify, render_template
 from flask_socketio import SocketIO, emit
+import os
+import json
+def load_questions_from_file():
+    questions_dir = os.path.join(os.getcwd(), 'questions')
+    if not os.path.exists(questions_dir):
+        raise FileNotFoundError("Questions directory not found")
 
+    questions_data = {}
+    for filename in os.listdir(questions_dir):
+        if filename.endswith('.json'):
+            chapter_name = os.path.splitext(filename)[0]
+            file_path = os.path.join(questions_dir, filename)
+            with open(file_path, 'r') as file:
+                questions = json.load(file)
+                questions_data[chapter_name] = questions
+    
+    return questions_data
+
+questions_data = load_questions_from_file()
 app = Flask(__name__)
 socketio = SocketIO(app)
 
 # Store the questions, student answers, and current question index
-questions_data = {}
 student_answers = []
 current_question_index = 0
 
