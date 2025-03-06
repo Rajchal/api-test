@@ -2,6 +2,8 @@ from flask import Flask, request, jsonify, render_template
 from flask_socketio import SocketIO, emit
 import os
 import json
+
+chapters_to_show=[]
 def load_questions_from_file():
     questions_dir = os.path.join(os.getcwd(), 'questions')
     if not os.path.exists(questions_dir):
@@ -14,6 +16,7 @@ def load_questions_from_file():
             file_path = os.path.join(questions_dir, filename)
             with open(file_path, 'r') as file:
                 questions = json.load(file)
+                chapters_to_show.append(chapter_name)
                 questions_data[chapter_name] = questions
     
     return questions_data
@@ -103,7 +106,7 @@ def get_answers():
 @app.route('/get_chapters',methods=['GET'])
 def get_chapters():
     try:
-        return jsonify({"list": [{"chapter": "Astronomy", "questions": []}]})
+        return questions_data
     except Exception as e:
         return jsonify({"error":str(e)}),500
 # Render the webpage to show questions and answers

@@ -1,12 +1,18 @@
 [
     {
         "question": "What is 2+2?",
-        "options": ["3", "4", "5"],
+        "optionA":"1",
+        "optionB":"2",
+        "optionC":"3",
+        "optionD":"4",
         "answer": "4"
     },
     {
         "question": "What is the capital of France?",
-        "options": ["Berlin", "Madrid", "Paris"],
+        "optionA":"Berlin",
+        "optionB":"Madrid",
+        "optionC":"Paris",
+        "optionD":"Apple",
         "answer": "Paris"
     }
 ]
