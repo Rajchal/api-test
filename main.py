@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify, render_template
 from flask_socketio import SocketIO, emit
 import json
+import os
 
 app = Flask(__name__)
 socketio = SocketIO(app)
