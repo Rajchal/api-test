@@ -158,5 +158,5 @@ def receive_command():
 
 # Run API on local network
 if __name__ == '__main__':
-    app.run(debug=True, host='192.168.1.100', port=5000)  # Replace 192.168.1.100 with your static IP
+    app.run(debug=True, host='0.0.0.0', port=5000)  # Replace 192.168.1.100 with your static IP
 
