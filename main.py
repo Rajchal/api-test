@@ -16,7 +16,7 @@ questions_data = {
                     "pumpkin"
                 ],
             "show":"yes",
-            "correct":"fruit",
+            "correct":"2",
         }
 student_answers = []
 current_question_index = 0
