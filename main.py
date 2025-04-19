@@ -20,6 +20,19 @@ questions_data = {
         }
 student_answers = []
 current_question_index = 0
+commands={
+        "next":"true"
+        }
+
+@app.route('/commands', methods=['GET'])
+def get_commands():
+    try:
+        return jsonify({"student_answers": student_answers}), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 
 # POST request to receive questions and options from teacher
 @app.route('/upload_questions', methods=['POST'])
@@ -54,6 +67,7 @@ def submit_answer():
     global current_question_index
     try:
         # Get answer data from ESP8266 (button press)
+
         data = request.get_json()
 
         # Validate answer data
@@ -102,61 +116,16 @@ def get_chapters():
     except Exception as e:
         return jsonify({"error":str(e)}),500
 # Render the webpage to show questions and answers
-@app.route('/')
+@app.route('/questions-live')
 def index():
     return  questions_data
-@app.route('/ans')
-def ans():
-    return student_answers
-
-@app.route('/display')
-def display_question():
-    """Page for students to see the latest question"""
-    
-    return current_question.replace(',','<br />')
 
 @app.route('/answers')
 def display_answers():
     return student_answers
 
-# Endpoint to receive commands from mobile
-@app.route('/command', methods=['POST'])
-def receive_command():
-    global current_question
-    global student_answers
-
-    data = request.get_json()
-    if not data or 'action' not in data:
-        return jsonify({"error": "Invalid request"}), 400
-
-    action = data['action']
-
-    # Change the displayed question
-    if action == "change_question":
-        current_question = data.get('question', 'No question provided')
-        print(f"Changing question to: {current_question}")
-        return jsonify({"status": "Question updated", "question": current_question})
-
-    # View student answers
-    elif action == "view_answers":
-        return jsonify({"status": "Success", "answers": student_answers})
-
-    # Restart Raspberry Pi
-    elif action == "restart":
-        os.system("sudo reboot")  
-        return jsonify({"status": "Raspberry Pi is restarting..."})
-    elif  action == "button_pressed":
-        button = data.get('button', 'Unknown')
-        student = button.split(',')
-        but=student[0]
-        stu=student[1]
-        student_answers[stu]=but
-        print(f"Button {but} pressed by student {stu}")
-        return jsonify({"status": "Button received", "button": button})
-    else:
-        return jsonify({"error": "Unknown command"}), 400
 
 # Run API on local network
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)  # Replace 192.168.1.100 with your static IP
+    socketio.run(app, debug=True, host='0.0.0.0', port=5000)  # Replace 192.168.1.100 with your static IP
 
