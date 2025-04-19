@@ -1,7 +1,6 @@
 from flask import Flask, request, jsonify, render_template
 from flask_socketio import SocketIO, emit
-import json
-import os
+import socket
 
 app = Flask(__name__)
 socketio = SocketIO(app)
@@ -19,18 +18,17 @@ questions_data = {
             "correct":"2",
         }
 student_answers = []
-current_question_index = 0
 commands={
         "next":"true"
         }
 
+#check commands if they are updated by raspberry pi
 @app.route('/commands', methods=['GET'])
 def get_commands():
-    try:
-        return jsonify({"student_answers": student_answers}), 200
-
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    @socketio.on('get_commands')
+    def handle_get_commands():
+        emit('commands', commands)
+    return jsonify(commands), 200
 
 
 
@@ -99,16 +97,6 @@ def submit_answer():
         return jsonify({"error": str(e)}), 500
 
 
-# GET request to get all answers submitted by students
-@app.route('/get_answers', methods=['GET'])
-def get_answers():
-    try:
-        # Return all submitted answers
-        return jsonify({"student_answers": student_answers}), 200
-
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
 @app.route('/get_chapters',methods=['GET'])
 def get_chapters():
     try:
@@ -127,5 +115,8 @@ def display_answers():
 
 # Run API on local network
 if __name__ == '__main__':
-    socketio.run(app, debug=True, host='0.0.0.0', port=5000)  # Replace 192.168.1.100 with your static IP
+    hostname = socket.gethostname()
+    local_ip = socket.gethostbyname(hostname)
+    print(f"Server is running on IP: {local_ip}")
+    socketio.run(app, debug=True, host='0.0.0.0', port=5000)
 
