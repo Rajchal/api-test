@@ -105,8 +105,11 @@ def get_chapters():
         return jsonify({"error":str(e)}),500
 # Render the webpage to show questions and answers
 @app.route('/questions-live')
-def index():
-    return  questions_data
+def questions_live():
+    @socketio.on('questions_live')
+    def handle_questions_live():
+        emit('questions_data', questions_data)
+    return questions_data
 
 @app.route('/answers')
 def display_answers():
