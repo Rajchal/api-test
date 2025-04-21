@@ -3,6 +3,7 @@ from werkzeug.utils import secure_filename
 import zipfile
 import os
 import io
+import json
 import uuid
 
 app = Flask(__name__)
@@ -67,24 +68,25 @@ def upload_quiz_zip():
     return jsonify({'error': 'File type not allowed'}), 400
 @app.route('/question')
 def display_extracted_zip():
-    """Display the contents of the extracted zip folder and return questions.json if available"""
-    folder_path = request.args.get('../uploads')
-    if not folder_path or not os.path.exists(folder_path):
-        return jsonify({'error': 'Invalid or missing folder path'}), 400
+    folder_path ='./uploads'
+    if not folder_path:
+        return jsonify({'error': 'Missing folder path'}), 400
+
+    folder_path = os.path.abspath(folder_path)
+    if not os.path.exists(folder_path):
+        app.logger.error(f"Provided folder path does not exist: {folder_path}")
+        return jsonify({'error': 'Invalid folder path'}), 400
 
     extracted_files = []
     questions_data = None
 
     try:
-        # Walk through the folder and list all files
         for root, dirs, files in os.walk(folder_path):
             for file in files:
-                file_path = os.path.join(root, file)
+                file_path = file
                 extracted_files.append(file_path)
-
-                # Check if the file is questions.json and load its content
                 if file == 'questions.json':
-                    with open(file_path, 'r') as f:
+                    with open(os.path.join(root,file), 'r') as f:
                         questions_data = json.load(f)
 
         return jsonify({
