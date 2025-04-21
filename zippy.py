@@ -65,7 +65,34 @@ def upload_quiz_zip():
                 os.rmdir(temp_dir)
     
     return jsonify({'error': 'File type not allowed'}), 400
+@app.route('/question')
+def display_extracted_zip():
+    """Display the contents of the extracted zip folder and return questions.json if available"""
+    folder_path = request.args.get('../uploads')
+    if not folder_path or not os.path.exists(folder_path):
+        return jsonify({'error': 'Invalid or missing folder path'}), 400
 
+    extracted_files = []
+    questions_data = None
+
+    try:
+        # Walk through the folder and list all files
+        for root, dirs, files in os.walk(folder_path):
+            for file in files:
+                file_path = os.path.join(root, file)
+                extracted_files.append(file_path)
+
+                # Check if the file is questions.json and load its content
+                if file == 'questions.json':
+                    with open(file_path, 'r') as f:
+                        questions_data = json.load(f)
+
+        return jsonify({
+            'extracted_files': extracted_files,
+            'questions_data': questions_data
+        }), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 def process_quiz_zip(zip_path, extract_dir):
     """Process the quiz zip file and extract its contents"""
     with zipfile.ZipFile(zip_path, 'r') as zip_ref:
