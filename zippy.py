@@ -88,7 +88,7 @@ def get_chapter_data(chapter_name):
     if not os.path.exists(folder_path):
         return jsonify({'error': 'Uploads folder does not exist'}), 400
 
-    chapter_file = os.path.join(folder_path, f"{chapter_name}.json")
+    chapter_file = os.path.join(folder_path,chapter_name)
     if not os.path.exists(chapter_file):
         return jsonify({'error': f'Chapter "{chapter_name}" not found'}), 404
 
