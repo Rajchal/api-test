@@ -56,7 +56,7 @@ def upload_quiz_zip():
             return jsonify({'error': str(e)}), 500
     return jsonify({'error': 'File type not allowed'}), 400
 
-@app.route('/question')
+@app.route('/api/quizzes',method=["POST"])
 def display_extracted_zip():
     folder_path ='./uploads'
     if not folder_path:
@@ -68,20 +68,15 @@ def display_extracted_zip():
         return jsonify({'error': 'Invalid folder path'}), 400
 
     extracted_files = []
-    questions_data = None
 
     try:
         for root, dirs, files in os.walk(folder_path):
-            for file in files:
-                file_path = file
+            for dir in dirs:
+                file_path = dir
                 extracted_files.append(file_path)
-                if file == 'questions.json':
-                    with open(os.path.join(root,file), 'r') as f:
-                        questions_data = json.load(f)
 
         return jsonify({
-            'extracted_files': extracted_files,
-            'questions_data': questions_data
+            'quizzes': extracted_files,
         }), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -116,4 +111,4 @@ def process_quiz_zip(zip_path, extract_dir):
 
 if __name__ == '__main__':
     os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-    app.run(debug=True)
+    app.run(host='0.0.0.0',port=5000)
