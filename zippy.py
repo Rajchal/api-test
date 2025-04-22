@@ -56,7 +56,7 @@ def upload_quiz_zip():
             return jsonify({'error': str(e)}), 500
     return jsonify({'error': 'File type not allowed'}), 400
 
-@app.route('/api/quizzes',method=["POST"])
+@app.route('/api/quizzes',methods=['GET'])
 def display_extracted_zip():
     folder_path ='./uploads'
     if not folder_path:
@@ -80,6 +80,28 @@ def display_extracted_zip():
         }), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+    
+
+@app.route('/api/chapter/<chapter_name>', methods=['GET'])
+def get_chapter_data(chapter_name):
+    folder_path = './uploads'
+    if not os.path.exists(folder_path):
+        return jsonify({'error': 'Uploads folder does not exist'}), 400
+
+    chapter_file = os.path.join(folder_path, f"{chapter_name}.json")
+    if not os.path.exists(chapter_file):
+        return jsonify({'error': f'Chapter "{chapter_name}" not found'}), 404
+
+    try:
+        with open(chapter_file, 'r') as file:
+            chapter_data = json.load(file)
+        return jsonify({'chapter': chapter_name, 'data': chapter_data}), 200
+    except json.JSONDecodeError:
+        return jsonify({'error': f'Failed to parse JSON for chapter "{chapter_name}"'}), 500
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    
+
 def process_quiz_zip(zip_path, extract_dir):
     """Process the quiz zip file and extract its contents"""
     with zipfile.ZipFile(zip_path, 'r') as zip_ref:
