@@ -9,7 +9,7 @@ import uuid
 app = Flask(__name__)
 
 # Configuration
-UPLOAD_FOLDER = 'uploads'
+UPLOAD_FOLDER = './uploads'
 ALLOWED_EXTENSIONS = {'zip'}
 MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16MB limit
 
@@ -33,9 +33,8 @@ def upload_quiz_zip():
         return jsonify({'error': 'No selected file'}), 400
     
     if file and allowed_file(file.filename):
-        # Secure the filename and create a unique directory
         filename = secure_filename(file.filename)
-        temp_dir = os.path.join(app.config['UPLOAD_FOLDER'], str(uuid.uuid4()))
+        temp_dir = './uploads'
         os.makedirs(temp_dir, exist_ok=True)
         
         try:
@@ -55,17 +54,8 @@ def upload_quiz_zip():
             return jsonify({'error': 'Invalid zip file'}), 400
         except Exception as e:
             return jsonify({'error': str(e)}), 500
-        finally:
-            # Clean up - remove temporary files
-            if os.path.exists(temp_dir):
-                for root, dirs, files in os.walk(temp_dir, topdown=False):
-                    for name in files:
-                        os.remove(os.path.join(root, name))
-                    for name in dirs:
-                        os.rmdir(os.path.join(root, name))
-                os.rmdir(temp_dir)
-    
     return jsonify({'error': 'File type not allowed'}), 400
+
 @app.route('/question')
 def display_extracted_zip():
     folder_path ='./uploads'
@@ -103,12 +93,6 @@ def process_quiz_zip(zip_path, extract_dir):
         
         # Look for specific files in the zip
         extracted_files = zip_ref.namelist()
-        
-        # Here you would process the files according to your quiz format
-        # For example, you might expect:
-        # - quiz.json (metadata)
-        # - questions.json (questions data)
-        # - media/ (folder with images/audio)
         
         result = {
             'files': extracted_files,
