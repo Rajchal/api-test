@@ -1,125 +1,139 @@
-from flask import Flask, request, jsonify, render_template
-from flask_socketio import SocketIO, emit
-import socket
+from flask import Flask, request, jsonify
+from werkzeug.utils import secure_filename
+import zipfile
+import os
+import json
+
 
 app = Flask(__name__)
-socketio = SocketIO(app)
 
-# Store the questions, student answers, and current question index
-questions_data = {
-            "question":"what is apple",
-            "options":[
-                    "honey",
-                    "veggies",
-                    "fruit",
-                    "pumpkin"
-                ],
-            "show":"yes",
-            "correct":"2",
+# Configuration
+UPLOAD_FOLDER = './uploads'
+ALLOWED_EXTENSIONS = {'zip'}
+MAX_CONTENT_LENGTH = 16 * 1024 * 1024  
+
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['MAX_CONTENT_LENGTH'] = MAX_CONTENT_LENGTH
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+@app.route('/api/upload-quiz-zip', methods=['POST'])
+def upload_quiz_zip():
+    # Check if the post request has the file part
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file part'}), 400
+    
+    file = request.files['file']
+    
+    # If user does not select file, browser submits empty part
+    if file.filename == '':
+        return jsonify({'error': 'No selected file'}), 400
+    
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        temp_dir = './uploads'
+        os.makedirs(temp_dir, exist_ok=True)
+        
+        try:
+            # Save the zip file temporarily
+            zip_path = os.path.join(temp_dir, filename)
+            file.save(zip_path)
+            
+            # Process the zip file
+            result = process_quiz_zip(zip_path, temp_dir)
+            
+            return jsonify({
+                'message': 'File successfully uploaded and processed',
+                'details': result
+            }), 200
+            
+        except zipfile.BadZipFile:
+            return jsonify({'error': 'Invalid zip file'}), 400
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+        finally:
+            if os.path.exists(zip_path):
+                os.remove(zip_path)
+    return jsonify({'error': 'File type not allowed'}), 400
+
+@app.route('/api/quizzes',methods=['GET'])
+def display_extracted_zip():
+    folder_path ='./uploads'
+    if not folder_path:
+        return jsonify({'error': 'Missing folder path'}), 400
+
+    folder_path = os.path.abspath(folder_path)
+    if not os.path.exists(folder_path):
+        app.logger.error(f"Provided folder path does not exist: {folder_path}")
+        return jsonify({'error': 'Invalid folder path'}), 400
+
+    extracted_files = []
+
+    try:
+        for root, dirs, files in os.walk(folder_path):
+            for dir in dirs:
+                file_path = dir
+                extracted_files.append(file_path)
+
+        return jsonify({
+            'quizzes': extracted_files,
+        }), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    
+
+@app.route('/api/chapter/<chapter_name>', methods=['GET'])
+def get_chapter_data(chapter_name):
+    folder_path = './uploads'
+    if not os.path.exists(folder_path):
+        return jsonify({'error': 'Uploads folder does not exist'}), 400
+
+    chapter_file = os.path.join(folder_path,chapter_name)
+    if not os.path.exists(chapter_file):
+        return jsonify({'error': f'Chapter "{chapter_name}" not found'}), 404
+
+    try:
+        ch_file=chapter_file+'/questions.json'
+        with open(ch_file, 'r') as file:
+            chapter_data = json.load(file)
+        return jsonify({'chapter': chapter_name, 'data': chapter_data}), 200
+    except json.JSONDecodeError:
+        return jsonify({'error': f'Failed to parse JSON for chapter "{chapter_name}"'}), 500
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    
+
+def process_quiz_zip(zip_path, extract_dir):
+    """Process the quiz zip file and extract its contents"""
+    with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+        # Extract all files
+        zip_ref.extractall(extract_dir)
+        
+        # Look for specific files in the zip
+        extracted_files = zip_ref.namelist()
+        
+        result = {
+            'files': extracted_files,
+            'quiz_data': None,
+            'questions': [],
+            'media_files': []
         }
-student_answers = []
-commands={
-        "next":"true"
-        }
+        
+        # Example processing - you'll need to customize this
+        for file in extracted_files:
+            if file.endswith('quiz.json'):
+                with open(os.path.join(extract_dir, file), 'r') as f:
+                    result['quiz_data'] = json.load(f)
+            elif file.endswith('questions.json'):
+                with open(os.path.join(extract_dir, file), 'r') as f:
+                    result['questions'] = json.load(f)
+            elif file.startswith('media/'):
+                result['media_files'].append(file)
+        
+        return result
 
-#check commands if they are updated by raspberry pi
-@app.route('/commands', methods=['GET'])
-def get_commands():
-    @socketio.on('get_commands')
-    def handle_get_commands():
-        emit('commands', commands)
-    return jsonify(commands), 200
-
-
-
-# POST request to receive questions and options from teacher
-@app.route('/upload_questions', methods=['POST'])
-def upload_questions():
-    global current_question_index
-    try:
-        # Receive JSON from teacher
-        data = request.get_json()
-
-        # Validate if data contains chapter and questions
-        if 'chapter' not in data or 'questions' not in data:
-            return jsonify({"error": "Invalid data format"}), 400
-        chapter_name = data['chapter']
-        questions = data['questions']
-
-        # Store questions in a dictionary
-        questions_data[chapter_name] = questions
-        current_question_index = 0  # Reset to the first question
-
-        # Emit the first question to all connected clients
-        socketio.emit('new_question', questions_data[chapter_name][current_question_index])
-
-        return jsonify({"message": f"Questions for {chapter_name} added successfully"}), 200
-
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-
-# POST request to receive answers from students (via ESP8266 remote)
-@app.route('/submit_answer', methods=['POST'])
-def submit_answer():
-    global current_question_index
-    try:
-        # Get answer data from ESP8266 (button press)
-
-        data = request.get_json()
-
-        # Validate answer data
-        if 'student_id' not in data or 'question_id' not in data or 'answer' not in data:
-            return jsonify({"error": "Invalid answer data"}), 400
-
-        student_id = data['student_id']
-        question_id = data['question_id']
-        answer = data['answer']
-
-        # Save the student's answer
-        student_answers.append({
-            "student_id": student_id,
-            "question_id": question_id,
-            "answer": answer
-        })
-
-        # Check if we need to move to the next question
-        if question_id == current_question_index:
-            current_question_index += 1
-
-            # If there are more questions, emit the next question
-            if current_question_index < len(questions_data[list(questions_data.keys())[0]]):
-                socketio.emit('new_question', questions_data[list(questions_data.keys())[0]][current_question_index])
-
-        return jsonify({"message": "Answer submitted successfully"}), 200
-
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-
-@app.route('/get_chapters',methods=['GET'])
-def get_chapters():
-    try:
-        return ques
-    except Exception as e:
-        return jsonify({"error":str(e)}),500
-# Render the webpage to show questions and answers
-@app.route('/questions-live')
-def questions_live():
-    @socketio.on('questions_live')
-    def handle_questions_live():
-        emit('questions_data', questions_data)
-    return questions_data
-
-@app.route('/answers')
-def display_answers():
-    return student_answers
-
-
-# Run API on local network
 if __name__ == '__main__':
-    hostname = socket.gethostname()
-    local_ip = socket.gethostbyname(hostname)
-    print(f"Server is running on IP: {local_ip}")
-    socketio.run(app, debug=True, host='0.0.0.0', port=5000)
-
+    os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+    app.run(host='0.0.0.0',port=5000)
