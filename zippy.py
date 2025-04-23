@@ -93,7 +93,8 @@ def get_chapter_data(chapter_name):
         return jsonify({'error': f'Chapter "{chapter_name}" not found'}), 404
 
     try:
-        with open(chapter_file, 'r') as file:
+        ch_file=chapter_file+'/questions.json'
+        with open(ch_file, 'r') as file:
             chapter_data = json.load(file)
         return jsonify({'chapter': chapter_name, 'data': chapter_data}), 200
     except json.JSONDecodeError:
