@@ -54,6 +54,9 @@ def upload_quiz_zip():
             return jsonify({'error': 'Invalid zip file'}), 400
         except Exception as e:
             return jsonify({'error': str(e)}), 500
+        finally:
+            if os.path.exists(zip_path):
+                os.remove(zip_path)
     return jsonify({'error': 'File type not allowed'}), 400
 
 @app.route('/api/quizzes',methods=['GET'])
