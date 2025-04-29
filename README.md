@@ -1,4 +1,4 @@
-# API Test
+# API
 
 This repository contains a Python script (`main.py`) designed for testing and interacting with APIs. Below is an overview of the project and how to use it.
 
