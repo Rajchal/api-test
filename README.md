@@ -8,11 +8,6 @@ This repository contains a Python script (`main.py`) designed for testing and in
 - **Customizable**: Modify the script to suit your API testing needs.
 - **Error Handling**: Includes basic error handling for failed requests.
 
-## Requirements
-
-- Python 3.7 or higher
-- Required libraries (install via `pip`):
-    - `requests`
 
 ## Installation
 
