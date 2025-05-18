@@ -82,7 +82,7 @@ def display_extracted_zip():
         }), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-    
+
 
 @app.route('/api/chapter/<chapter_name>', methods=['GET'])
 def get_chapter_data(chapter_name):
@@ -116,17 +116,13 @@ def process_quiz_zip(zip_path, extract_dir):
         
         result = {
             'files': extracted_files,
-            'quiz_data': None,
             'questions': [],
             'media_files': []
         }
         
         # Example processing - you'll need to customize this
         for file in extracted_files:
-            if file.endswith('quiz.json'):
-                with open(os.path.join(extract_dir, file), 'r') as f:
-                    result['quiz_data'] = json.load(f)
-            elif file.endswith('questions.json'):
+            if file.endswith('questions.json'):
                 with open(os.path.join(extract_dir, file), 'r') as f:
                     result['questions'] = json.load(f)
             elif file.startswith('media/'):
