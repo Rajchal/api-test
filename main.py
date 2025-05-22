@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_file
 from werkzeug.utils import secure_filename
 import zipfile
 import os
@@ -85,24 +85,26 @@ def display_extracted_zip():
 
 
 @app.route('/api/chapter/<chapter_name>', methods=['GET'])
-def get_chapter_data(chapter_name):
-    folder_path = './uploads'
-    if not os.path.exists(folder_path):
-        return jsonify({'error': 'Uploads folder does not exist'}), 400
+def get_chapter_zip(chapter_name):
+    folder_path = os.path.join('./uploads', chapter_name)
+    if not os.path.exists(folder_path) or not os.path.isdir(folder_path):
+        return jsonify({'error': f'Folder "{chapter_name}" not found'}), 404
 
-    chapter_file = os.path.join(folder_path,chapter_name)
-    if not os.path.exists(chapter_file):
-        return jsonify({'error': f'Chapter "{chapter_name}" not found'}), 404
-
+    zip_file_path = os.path.join('./uploads', f"{chapter_name}.zip")
     try:
-        ch_file=chapter_file+'/questions.json'
-        with open(ch_file, 'r') as file:
-            chapter_data = json.load(file)
-        return jsonify({'chapter': chapter_name, 'data': chapter_data}), 200
-    except json.JSONDecodeError:
-        return jsonify({'error': f'Failed to parse JSON for chapter "{chapter_name}"'}), 500
+        # Create a zip of the folder
+        with zipfile.ZipFile(zip_file_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+            for root, dirs, files in os.walk(folder_path):
+                for file in files:
+                    abs_path = os.path.join(root, file)
+                    rel_path = os.path.relpath(abs_path, folder_path)
+                    zipf.write(abs_path, arcname=rel_path)
+        return send_file(zip_file_path, as_attachment=True)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+    finally:
+        if os.path.exists(zip_file_path):
+            os.remove(zip_file_path)
     
 
 def process_quiz_zip(zip_path, extract_dir):
