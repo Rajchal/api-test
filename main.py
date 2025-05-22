@@ -136,14 +136,7 @@ def process_quiz_zip(zip_path, extract_dir):
             'media_files': []
         }
         
-        # Example processing - you'll need to customize this
-        for file in extracted_files:
-            if file.endswith('questions.json'):
-                with open(os.path.join(extract_dir, file), 'r') as f:
-                    result['questions'] = json.load(f)
-            elif file.startswith('media/'):
-                result['media_files'].append(file)
-        
+  
         return result
 
 if __name__ == '__main__':
