@@ -3,6 +3,7 @@ from werkzeug.utils import secure_filename
 import zipfile
 import os
 import json
+import shutil
 
 
 app = Flask(__name__)
@@ -92,12 +93,13 @@ def get_chapter_zip(chapter_name):
 
     zip_file_path = os.path.join('./uploads', f"{chapter_name}.zip")
     try:
-        # Create a zip of the folder
+        # Create a zip of the folder, including the folder itself as the root
         with zipfile.ZipFile(zip_file_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
             for root, dirs, files in os.walk(folder_path):
                 for file in files:
                     abs_path = os.path.join(root, file)
-                    rel_path = os.path.relpath(abs_path, folder_path)
+                    # Include the chapter folder as the root in the zip
+                    rel_path = os.path.relpath(abs_path, os.path.dirname(folder_path))
                     zipf.write(abs_path, arcname=rel_path)
         return send_file(zip_file_path, as_attachment=True)
     except Exception as e:
@@ -105,7 +107,19 @@ def get_chapter_zip(chapter_name):
     finally:
         if os.path.exists(zip_file_path):
             os.remove(zip_file_path)
-    
+
+@app.route('/quiz/<quiz_name>', methods=['DELETE'])
+def delete_quiz(quiz_name):
+    folder_path = os.path.join(app.config['UPLOAD_FOLDER'], quiz_name)
+    if not os.path.exists(folder_path) or not os.path.isdir(folder_path):
+        return jsonify({'error': f'Quiz "{quiz_name}" not found'}), 404
+
+    try:
+        # Remove the quiz folder and all its contents
+        shutil.rmtree(folder_path)
+        return jsonify({'message': f'Quiz "{quiz_name}" deleted successfully'}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 def process_quiz_zip(zip_path, extract_dir):
     """Process the quiz zip file and extract its contents"""
