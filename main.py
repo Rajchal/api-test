@@ -20,7 +20,7 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-@app.route('/api/upload-quiz-zip', methods=['POST'])
+@app.route('/quiz-upload', methods=['POST'])
 def upload_quiz_zip():
     # Check if the post request has the file part
     if 'file' not in request.files:
@@ -59,7 +59,7 @@ def upload_quiz_zip():
                 os.remove(zip_path)
     return jsonify({'error': 'File type not allowed'}), 400
 
-@app.route('/api/quizzes',methods=['GET'])
+@app.route('/quizzes',methods=['GET'])
 def display_extracted_zip():
     folder_path ='./uploads'
     if not folder_path:
@@ -85,7 +85,7 @@ def display_extracted_zip():
         return jsonify({'error': str(e)}), 500
 
 
-@app.route('/api/chapter/<chapter_name>', methods=['GET'])
+@app.route('/chapter/<chapter_name>', methods=['GET'])
 def get_chapter_zip(chapter_name):
     folder_path = os.path.join('./uploads', chapter_name)
     if not os.path.exists(folder_path) or not os.path.isdir(folder_path):
@@ -108,7 +108,7 @@ def get_chapter_zip(chapter_name):
         if os.path.exists(zip_file_path):
             os.remove(zip_file_path)
 
-@app.route('/quiz/<quiz_name>', methods=['DELETE'])
+@app.route('/quiz-delete/<quiz_name>', methods=['DELETE','POST'])
 def delete_quiz(quiz_name):
     folder_path = os.path.join(app.config['UPLOAD_FOLDER'], quiz_name)
     if not os.path.exists(folder_path) or not os.path.isdir(folder_path):
