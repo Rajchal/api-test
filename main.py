@@ -29,11 +29,16 @@ def index():
 def to_show():
     action={
         'action': 'show-logo',
+        'quiz-name': 'Quiz Name',
     }
 
     return jsonify(action), 200
 
+@app.route('/live-quiz', methods=['GET'])
+def to_show_quiz():
 
+
+    return jsonify(action), 200
 
 @app.route('/quiz-upload', methods=['POST'])
 def upload_quiz_zip():
