@@ -88,9 +88,7 @@ def display_extracted_zip():
                             'error': f'Failed to load questions.json: {str(e)}'
                         })
 
-        return jsonify({
-            'quizzes': extracted_files,
-        }), 200
+        return jsonify(extracted_files), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
