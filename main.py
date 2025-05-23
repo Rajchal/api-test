@@ -76,7 +76,17 @@ def display_extracted_zip():
         for root, dirs, files in os.walk(folder_path):
             for dir in dirs:
                 file_path = dir
-                extracted_files.append(file_path)
+                questions_json_path = os.path.join(folder_path, dir, 'questions.json')
+                if os.path.isfile(questions_json_path):
+                    try:
+                        with open(questions_json_path, 'r', encoding='utf-8') as f:
+                            questions_data = json.load(f)
+                        extracted_files.append(questions_data['quiz'])
+                    except Exception as e:
+                        extracted_files.append({
+                            'quiz_name': dir,
+                            'error': f'Failed to load questions.json: {str(e)}'
+                        })
 
         return jsonify({
             'quizzes': extracted_files,
