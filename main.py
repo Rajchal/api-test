@@ -111,7 +111,10 @@ def get_chapter_zip(chapter_name):
                     # Include the chapter folder as the root in the zip
                     rel_path = os.path.relpath(abs_path, os.path.dirname(folder_path))
                     zipf.write(abs_path, arcname=rel_path)
-        return send_file(zip_file_path, as_attachment=True)
+        file_size = os.path.getsize(zip_file_path)
+        response = send_file(zip_file_path, as_attachment=True)
+        response.headers['Content-Length'] = file_size
+        return response
     except Exception as e:
         return jsonify({'error': str(e)}), 500
     finally:
