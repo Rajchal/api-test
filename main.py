@@ -82,7 +82,6 @@ def display_extracted_zip():
                         with open(questions_json_path, 'r', encoding='utf-8') as f:
                             questions_data = json.load(f)
                             quiz_data=questions_data['quiz']
-                            quiz_data['quizId'] = int(dir.split('-')[0])
                         extracted_files.append(quiz_data)
                     except Exception as e:
                         extracted_files.append({
