@@ -40,7 +40,7 @@ def update_display():
     quizName = data['quizName']
     index_of_question = 0
     display_bool = True
-    
+
     return jsonify({'message': 'Quiz name updated successfully', 'quizName': quizName}), 200
 
 @app.route('/display', methods=['GET'])
@@ -82,7 +82,7 @@ def to_show_quiz(chapter_name):
     with open(questions_json_path, 'r', encoding='utf-8') as f:
         questions_data = json.load(f)
     question=questions_data['questions']
-    return jsonify(question[index_of_question]), 200
+    return jsonify({'question': question[index_of_question], 'display': display_bool}), 200
 
 @app.route('/quiz-upload', methods=['POST'])
 def upload_quiz_zip():
