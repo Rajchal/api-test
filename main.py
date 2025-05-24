@@ -34,7 +34,7 @@ def to_show():
 
     return jsonify(action), 200
 
-@app.route('/live-quiz/<chapter-name>', methods=['GET'])
+@app.route('/live-quiz/<chapter_name>', methods=['GET'])
 def to_show_quiz(chapter_name):
     folder_path = os.path.join('./uploads', chapter_name)
     if not os.path.exists(folder_path) or not os.path.isdir(folder_path):
