@@ -26,7 +26,6 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-
 @app.route('/')
 def index():
     return jsonify({'message': 'Welcome to the Quiz Upload API'}), 200
@@ -40,14 +39,13 @@ def update_display():
     quizName = data['quizName']
     index_of_question = 0
     display_bool = True
-
     return jsonify({'message': 'Quiz name updated successfully', 'quizName': quizName}), 200
 
 @app.route('/display', methods=['GET'])
 def display_quiz():
     global quizName
     if not quizName:
-        return jsonify({'error': 'Quiz name not set. Please set it using /update-display endpoint.'}), 400
+        return jsonify({'quizName':'none','display':False}), 200
     return jsonify({'quizName': quizName, 'display': display_bool}), 200
 
 @app.route('/update-action', methods=['POST'])
