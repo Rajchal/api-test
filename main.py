@@ -31,16 +31,14 @@ def index():
 
 @app.route('/update-action', methods=['POST'])
 def update_action():
-    global action
+    global action, index_of_question  # Declare both at the top
     data = request.get_json()
     if not data or 'action' not in data:
         return jsonify({'error': 'Invalid input, "action" key is required'}), 400
     action['action'] = data['action']
     if action['action']=='NEXT':
-        global index_of_question
         index_of_question += 1
     elif action['action']=='PREVIOUS':
-        global index_of_question
         if index_of_question > 0:
             index_of_question -= 1
     return jsonify({'message': 'Action updated successfully', 'action': action}), 200
