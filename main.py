@@ -8,6 +8,9 @@ import shutil
 
 app = Flask(__name__)
 index_of_question=0
+action={
+    'action':'',
+}
 # Configuration
 UPLOAD_FOLDER = './uploads'
 ALLOWED_EXTENSIONS = {'zip'}
@@ -25,14 +28,19 @@ def allowed_file(filename):
 def index():
     return jsonify({'message': 'Welcome to the Quiz Upload API'}), 200
 
-@app.route('/live', methods=['GET'])
-def to_show():
-    action={
-        'action': 'show-logo',
-        'quiz-name': 'Quiz Name',
-    }
+@app.route('/update-action', methods=['POST'])
+def update_action():
+    global action
+    data = request.get_json()
+    if not data or 'action' not in data:
+        return jsonify({'error': 'Invalid input, "action" key is required'}), 400
+    action['action'] = data['action']
+    return jsonify({'message': 'Action updated successfully', 'action': action}), 200
 
+@app.route('/action', methods=['GET'])
+def to_show():
     return jsonify(action), 200
+
 
 @app.route('/live-quiz/<chapter_name>', methods=['GET'])
 def to_show_quiz(chapter_name):
