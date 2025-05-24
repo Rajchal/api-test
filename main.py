@@ -4,9 +4,11 @@ import zipfile
 import os
 import json
 import shutil
+from flask_cors import CORS
 
 
 app = Flask(__name__)
+CORS(app)
 index_of_question=0
 action={
     'action':'',
