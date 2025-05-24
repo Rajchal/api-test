@@ -11,6 +11,8 @@ index_of_question=0
 action={
     'action':'',
 }
+quizName = ''
+display_bool = False
 
 # Configuration
 UPLOAD_FOLDER = './uploads'
@@ -29,9 +31,28 @@ def allowed_file(filename):
 def index():
     return jsonify({'message': 'Welcome to the Quiz Upload API'}), 200
 
+@app.route('/update-display', methods=['POST'])
+def update_display():
+    global quizName, index_of_question, display_bool
+    data = request.get_json()
+    if not data or 'quizName' not in data:
+        return jsonify({'error': 'Invalid input, "quizName" key is required'}), 400
+    quizName = data['quizName']
+    index_of_question = 0
+    display_bool = True
+    
+    return jsonify({'message': 'Quiz name updated successfully', 'quizName': quizName}), 200
+
+@app.route('/display', methods=['GET'])
+def display_quiz():
+    global quizName
+    if not quizName:
+        return jsonify({'error': 'Quiz name not set. Please set it using /update-display endpoint.'}), 400
+    return jsonify({'quizName': quizName, 'display': display_bool}), 200
+
 @app.route('/update-action', methods=['POST'])
 def update_action():
-    global action, index_of_question  # Declare both at the top
+    global action, index_of_question, display_bool  # Declare both at the top
     data = request.get_json()
     if not data or 'action' not in data:
         return jsonify({'error': 'Invalid input, "action" key is required'}), 400
@@ -41,12 +62,13 @@ def update_action():
     elif action['action']=='PREVIOUS':
         if index_of_question > 0:
             index_of_question -= 1
+    elif action['action']=='FINISH':
+        display_bool = False
     return jsonify({'message': 'Action updated successfully', 'action': action}), 200
 
 @app.route('/action', methods=['GET'])
 def to_show():
     return jsonify(action), 200
-
 
 @app.route('/live-quiz/<chapter_name>', methods=['GET'])
 def to_show_quiz(chapter_name):
