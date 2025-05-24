@@ -7,7 +7,7 @@ import shutil
 
 
 app = Flask(__name__)
-
+index_of_question=0
 # Configuration
 UPLOAD_FOLDER = './uploads'
 ALLOWED_EXTENSIONS = {'zip'}
@@ -34,11 +34,19 @@ def to_show():
 
     return jsonify(action), 200
 
-@app.route('/live-quiz', methods=['GET'])
-def to_show_quiz():
+@app.route('/live-quiz/<chapter-name>', methods=['GET'])
+def to_show_quiz(chapter_name):
+    folder_path = os.path.join('./uploads', chapter_name)
+    if not os.path.exists(folder_path) or not os.path.isdir(folder_path):
+        return jsonify({'error': f'Folder "{chapter_name}" not found'}), 404
+    questions_json_path = os.path.join(folder_path, 'questions.json')
+    if not os.path.isfile(questions_json_path):
+        return jsonify({'error': f'"questions.json" not found in "{chapter_name}"'}), 404
 
-
-    return jsonify(action), 200
+    with open(questions_json_path, 'r', encoding='utf-8') as f:
+        questions_data = json.load(f)
+    question=questions_data['questions']
+    return jsonify(question[index_of_question]), 200
 
 @app.route('/quiz-upload', methods=['POST'])
 def upload_quiz_zip():
