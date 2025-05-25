@@ -196,6 +196,32 @@ def delete_quiz(quiz_name):
         return jsonify({'message': f'Quiz "{quiz_name}" deleted successfully'}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+    
+@app.route('/login', methods=['POST'])
+def login():
+    data = request.get_json()
+    if not data or 'username' not in data or 'password' not in data:
+        return jsonify({'error': 'Invalid input, "username" and "password" keys are required'}), 400
+    
+    username = data['user_id']
+    password = data['password']
+    
+    # Check credentials from userpass.json file
+    userpass_path = os.path.join(os.path.dirname(__file__), 'userpass.json')
+    if not os.path.isfile(userpass_path):
+        return jsonify({'error': 'User credentials file not found'}), 500
+
+    try:
+        with open(userpass_path, 'r', encoding='utf-8') as f:
+            users = json.load(f)
+    except Exception as e:
+        return jsonify({'error': f'Failed to read credentials: {str(e)}'}), 500
+
+    # users should be a dict: { "username1": "password1", ... }
+    if username in users and users[username] == password:
+        return jsonify({'status':True}), 200
+    else:
+        return jsonify({'status': False}), 200
 
 def process_quiz_zip(zip_path, extract_dir):
     """Process the quiz zip file and extract its contents"""
@@ -214,6 +240,7 @@ def process_quiz_zip(zip_path, extract_dir):
         
   
         return result
+
 
 if __name__ == '__main__':
     os.makedirs(UPLOAD_FOLDER, exist_ok=True)
