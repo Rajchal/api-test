@@ -200,7 +200,7 @@ def delete_quiz(quiz_name):
 @app.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
-    if not data or 'username' not in data or 'password' not in data:
+    if not data or 'user_id' not in data or 'password' not in data:
         return jsonify({'error': 'Invalid input, "username" and "password" keys are required'}), 400
     
     username = data['user_id']
@@ -214,6 +214,7 @@ def login():
     try:
         with open(userpass_path, 'r', encoding='utf-8') as f:
             users = json.load(f)
+            print(users['user1'])
     except Exception as e:
         return jsonify({'error': f'Failed to read credentials: {str(e)}'}), 500
 
