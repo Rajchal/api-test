@@ -13,9 +13,19 @@ index_of_question=0
 action={
     'action':'',
 }
+scores={
+    'Nidhi':0,
+    'Sachet':0,
+    'Anjal':0
+}
+flag={
+    'Nidhi':True,
+    'Sachet':True,
+    'Anjal':True
+}
 quizName = ''
 display_bool = False
-
+global_question=[]
 # Configuration
 UPLOAD_FOLDER = './uploads'
 ALLOWED_EXTENSIONS = {'zip'}
@@ -52,13 +62,16 @@ def display_quiz():
 
 @app.route('/update-action', methods=['POST'])
 def update_action():
-    global action, index_of_question, display_bool  # Declare both at the top
+    global action, index_of_question, display_bool, flag  # Declare both at the top
     data = request.get_json()
     if not data or 'action' not in data:
         return jsonify({'error': 'Invalid input, "action" key is required'}), 400
     action['action'] = data['action']
     if action['action']=='NEXT':
         index_of_question += 1
+        flag['Anjal']=True
+        flag['Nidhi']=True
+        flag['Sachet']=True
     elif action['action']=='PREVIOUS':
         if index_of_question > 0:
             index_of_question -= 1
@@ -72,6 +85,7 @@ def to_show():
 
 @app.route('/live-quiz/<chapter_name>', methods=['GET'])
 def to_show_quiz(chapter_name):
+    global global_question
     folder_path = os.path.join('./uploads', chapter_name)
     if not os.path.exists(folder_path) or not os.path.isdir(folder_path):
         return jsonify({'error': f'Folder "{chapter_name}" not found'}), 404
@@ -81,8 +95,8 @@ def to_show_quiz(chapter_name):
 
     with open(questions_json_path, 'r', encoding='utf-8') as f:
         questions_data = json.load(f)
-    question=questions_data['questions']
-    return jsonify({'question': question[index_of_question], 'display': display_bool}), 200
+    global_question=questions_data['questions']
+    return jsonify({'question': global_question[index_of_question], 'display': display_bool}), 200
 
 @app.route('/quiz-upload', methods=['POST'])
 def upload_quiz_zip():
@@ -196,7 +210,29 @@ def delete_quiz(quiz_name):
         return jsonify({'message': f'Quiz "{quiz_name}" deleted successfully'}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+@app.route('/answer', methods=['POST'])
+def submit_answer():
+    global flag
+    data = request.get_json()
+    if not data or 'button' not in data:
+        return jsonify({'error': 'Invalid input, "button" key is required'}), 400
     
+    answer = data['button']
+    student =data['student']
+
+    quest=global_question[index_of_question]
+
+    if int(answer)== quest['correctOptionIndex'] and flag[student]:
+        scores[student]+=1
+        flag[student]==False
+
+    return jsonify({'status': 'success', 'answer': answer,'student':student}), 200
+
+@app.route('/scores',methods=['GET'])
+def get_scores():
+    return jsonify(scores), 200
+
 @app.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
