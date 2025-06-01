@@ -313,6 +313,52 @@ def upload_material():
                 os.remove(zip_path)
     return jsonify({'error': 'File type not allowed'}), 400
 
+@app.route('/material', methods=['GET'])
+def get_material():
+    extract_dir_material = './material_uploads'
+    if not os.path.exists(extract_dir_material):
+        return jsonify({'error': 'No material uploaded yet'}), 404
+
+    try:
+        # List all files in the material directory
+        extracted_files = os.listdir(extract_dir_material)
+        if not extracted_files:
+            return jsonify({'message': 'No material files found'}), 200
+        
+        # Process each file in the directory
+        result = process_material_zip(os.path.join(extract_dir_material, extracted_files[0]), extract_dir_material)
+        
+        return jsonify(result), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/material/<filename>', methods=['GET'])
+def get_material_file(filename):
+    extract_dir_material = './material_uploads'
+    file_path = os.path.join(extract_dir_material, filename)
+    
+    if not os.path.exists(file_path):
+        return jsonify({'error': f'File "{filename}" not found'}), 404
+    
+    try:
+        return send_file(file_path, as_attachment=True)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+# delete material
+@app.route('/material-delete/<filename>', methods=['DELETE'])
+def delete_material(filename):
+    extract_dir_material = './material_uploads'
+    file_path = os.path.join(extract_dir_material, filename)
+    
+    if not os.path.exists(file_path):
+        return jsonify({'error': f'File "{filename}" not found'}), 404
+    
+    try:
+        os.remove(file_path)
+        return jsonify({'message': f'File "{filename}" deleted successfully'}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 def process_material_zip(zip_path, extract_dir_material):
     """Process the material zip file and extract its contents"""
