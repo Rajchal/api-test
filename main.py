@@ -272,6 +272,67 @@ def login():
         return jsonify({'status':True}), 200
     else:
         return jsonify({'status': False}), 200
+    
+@app.route('/material-upload', methods=['POST'])
+def upload_material():
+    # Check if the post request has the file part
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file part'}), 400
+    
+    file = request.files['file']
+    
+    # If user does not select file, browser submits empty part
+    if file.filename == '':
+        return jsonify({'error': 'No selected file'}), 400
+    
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        temp_dir = './material_uploads'
+        if not os.path.exists(temp_dir):
+            os.makedirs(temp_dir, exist_ok=True)
+
+        try:
+            # Save the zip file temporarily
+            zip_path = os.path.join(temp_dir, filename)
+            file.save(zip_path)
+            
+            # Process the zip file
+            result = process_quiz_zip(zip_path, temp_dir)
+            
+            return jsonify({
+                'message': 'File successfully uploaded and processed',
+                'details': result
+            }), 200
+            
+        except zipfile.BadZipFile:
+            return jsonify({'error': 'Invalid zip file'}), 400
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+        finally:
+            if os.path.exists(zip_path):
+                os.remove(zip_path)
+    return jsonify({'error': 'File type not allowed'}), 400
+
+
+def process_material_zip(zip_path, extract_dir_material):
+    """Process the material zip file and extract its contents"""
+    with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+        # Extract all files
+        zip_ref.extractall(extract_dir_material)
+        
+        # Look for specific files in the zip
+        extracted_files = zip_ref.namelist()
+        
+        result = {
+            'files': extracted_files,
+            'media_files': []
+        }
+        
+        for file in extracted_files:
+            if file.endswith(('.mp4', '.jpg', '.png', '.pdf')):
+                result['media_files'].append(file)
+        
+        return result
 
 def process_quiz_zip(zip_path, extract_dir):
     """Process the quiz zip file and extract its contents"""
