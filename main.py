@@ -77,6 +77,14 @@ def update_action():
             index_of_question -= 1
     elif action['action']=='FINISH':
         display_bool = False
+    elif action['action']=='EXIT':
+        display_bool = False
+        index_of_question = 0
+        action['action'] = ''
+        global_question.clear()
+        flag['Anjal']=True
+        flag['Nidhi']=True
+        flag['Sachet']=True        
     return jsonify({'message': 'Action updated successfully', 'action': action}), 200
 
 @app.route('/action', methods=['GET'])
