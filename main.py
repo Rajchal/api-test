@@ -77,6 +77,11 @@ def update_action():
             index_of_question -= 1
     elif action['action']=='FINISH':
         display_bool = False
+        global_question.clear()
+        index_of_question = 0
+        flag['Anjal']=True
+        flag['Nidhi']=True
+        flag['Sachet']=True   
     elif action['action']=='EXIT':
         display_bool = False
         index_of_question = 0
