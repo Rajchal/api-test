@@ -285,7 +285,8 @@ def upload_material():
     if file.filename == '':
         return jsonify({'error': 'No selected file'}), 400
     
-    if file and allowed_file(file.filename):
+    # Check mimetype for zip
+    if file and allowed_file(file.filename) and file.mimetype == 'application/zip':
         filename = secure_filename(file.filename)
         temp_dir = './material_uploads'
         if not os.path.exists(temp_dir):
@@ -297,18 +298,19 @@ def upload_material():
             file.save(zip_path)
             
             # Process the zip file
-             # result = process_quiz_zip(zip_path, temp_dir)
+            # result = process_quiz_zip(zip_path, temp_dir)
 
-            return 200
+            return jsonify({'message': 'File successfully uploaded'}), 200
 
         except zipfile.BadZipFile:
             return jsonify({'error': 'Invalid zip file'}), 400
         except Exception as e:
+            print(f"Error processing material zip: {str(e)}")
             return jsonify({'error': str(e)}), 500
         finally:
             if os.path.exists(zip_path):
                 os.remove(zip_path)
-    return jsonify({'error': 'File type not allowed'}), 400
+    return jsonify({'error': 'File type not allowed or mimetype is not application/zip'}), 400
 
 @app.route('/materials', methods=['GET'])
 def get_material():
