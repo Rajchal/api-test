@@ -1,4 +1,10 @@
 {
-    "user1": "password1",
-    "user2": "password2"
+    "user1": {
+        "password": "password1",
+        "role":"STUDENT"
+    },
+    "user2": {
+        "password": "password2",
+        "role":"TEACHER"
+    }
 }
