@@ -300,7 +300,6 @@ def upload_material():
             # Process the zip file
             # result = process_quiz_zip(zip_path, temp_dir)
 
-            return 200
 
         except zipfile.BadZipFile:
             return jsonify({'error': 'Invalid zip file'}), 400
