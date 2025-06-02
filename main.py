@@ -317,11 +317,7 @@ def get_material():
         return jsonify({'error': 'No material uploaded yet'}), 404
 
     try:
-        # List all files in the material directory
-        extracted_files = os.listdir(extract_dir_material)
-        if not extracted_files:
-            return jsonify({'message': 'No material files found'}), 200
-
+        extracted_files = []
         for root, dirs, files in os.walk(extract_dir_material):
             for dir in dirs:
                 material_data={}
