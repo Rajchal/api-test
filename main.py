@@ -297,12 +297,9 @@ def upload_material():
             file.save(zip_path)
             
             # Process the zip file
-            result = process_quiz_zip(zip_path, temp_dir)
+             # result = process_quiz_zip(zip_path, temp_dir)
             
-            return jsonify({
-                'message': 'File successfully uploaded and processed',
-                'details': result
-            }), 200
+            return  200
             
         except zipfile.BadZipFile:
             return jsonify({'error': 'Invalid zip file'}), 400
