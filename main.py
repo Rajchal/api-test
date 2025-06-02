@@ -308,7 +308,7 @@ def upload_material():
             return jsonify({'error': str(e)}), 500
         finally:
             if os.path.exists(zip_path):
-                os.remove(zip_path)
+                print("lol")
         return jsonify({'message': 'File successfully uploaded and processed'}), 200
     return jsonify({'error': 'File type not allowed or mimetype is not a recognized zip type'}), 400
 
