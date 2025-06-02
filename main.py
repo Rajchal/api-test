@@ -298,9 +298,9 @@ def upload_material():
             
             # Process the zip file
              # result = process_quiz_zip(zip_path, temp_dir)
-            
-            return  200
-            
+
+            return 200
+
         except zipfile.BadZipFile:
             return jsonify({'error': 'Invalid zip file'}), 400
         except Exception as e:
@@ -344,9 +344,20 @@ def get_material_file(filename):
     
     if not os.path.exists(file_path):
         return jsonify({'error': f'File "{filename}" not found'}), 404
-    
+    zip_file_path = os.path.join(extract_dir_material, f"{filename}.zip")
     try:
-        return send_file(file_path, as_attachment=True)
+        # Create a zip of the folder, including the folder itself as the root
+        with zipfile.ZipFile(zip_file_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+            for root, dirs, files in os.walk(file_path):
+                for file in files:
+                    abs_path = os.path.join(root, file)
+                    # Include the chapter folder as the root in the zip
+                    rel_path = os.path.relpath(abs_path, os.path.dirname(file_path))
+                    zipf.write(abs_path, arcname=rel_path)
+        file_size = os.path.getsize(zip_file_path)
+        response = send_file(zip_file_path, as_attachment=True)
+        response.headers['Content-Length'] = file_size
+        return response
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
