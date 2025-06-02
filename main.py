@@ -324,11 +324,8 @@ def get_material():
         extracted_files = os.listdir(extract_dir_material)
         if not extracted_files:
             return jsonify({'message': 'No material files found'}), 200
-        
-        # Process each file in the directory
-        result = process_material_zip(os.path.join(extract_dir_material, extracted_files[0]), extract_dir_material)
-        
-        return jsonify(result), 200
+
+        return jsonify(extracted_files), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
