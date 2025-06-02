@@ -249,11 +249,12 @@ def get_scores():
 @app.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
-    if not data or 'user_id' not in data or 'password' not in data:
-        return jsonify({'error': 'Invalid input, "username" and "password" keys are required'}), 400
-    
+    if not data or 'user_id' not in data or 'password' not in data or 'role' not in data:
+        return jsonify({'error': 'Invalid input, "username", "password" and "role" keys are required'}), 400
+
     username = data['user_id']
     password = data['password']
+    role = data['role']
     
     # Check credentials from userpass.json file
     userpass_path = os.path.join(os.path.dirname(__file__), 'userpass.json')
@@ -263,12 +264,11 @@ def login():
     try:
         with open(userpass_path, 'r', encoding='utf-8') as f:
             users = json.load(f)
-            print(users['user1'])
     except Exception as e:
         return jsonify({'error': f'Failed to read credentials: {str(e)}'}), 500
 
     # users should be a dict: { "username1": "password1", ... }
-    if username in users and users[username] == password:
+    if username in users and username.password == password and username.role == role:
         return jsonify({'status':True}), 200
     else:
         return jsonify({'status': False}), 200
@@ -300,7 +300,7 @@ def upload_material():
             # Process the zip file
             # result = process_quiz_zip(zip_path, temp_dir)
 
-            return jsonify({'message': 'File successfully uploaded'}), 200
+            return 200
 
         except zipfile.BadZipFile:
             return jsonify({'error': 'Invalid zip file'}), 400
