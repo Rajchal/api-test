@@ -360,7 +360,10 @@ def delete_material(filename):
         return jsonify({'error': f'File "{filename}" not found'}), 404
     
     try:
-        os.remove(file_path)
+        if os.path.isdir(file_path):
+            shutil.rmtree(file_path)
+        else:
+            os.remove(file_path)
         return jsonify({'message': f'File "{filename}" deleted successfully'}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
