@@ -267,9 +267,9 @@ def login():
     except Exception as e:
         return jsonify({'error': f'Failed to read credentials: {str(e)}'}), 500
 
-    # users should be a dict: { "username1": "password1", ... }
-    if username in users and username.password == password and username.role == role:
-        return jsonify({'status':True}), 200
+    # users should be a dict: { "username1": {"password": "...", "role": "..."}, ... }
+    if username in users and users[username]['password'] == password and users[username]['role'] == role:
+        return jsonify({'status': True}), 200
     else:
         return jsonify({'status': False}), 200
     
