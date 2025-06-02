@@ -322,6 +322,20 @@ def get_material():
         if not extracted_files:
             return jsonify({'message': 'No material files found'}), 200
 
+        for root, dirs, files in os.walk(extract_dir_material):
+            for dir in dirs:
+                material_json_path = os.path.join(extract_dir_material, dir, 'material.json')
+                if os.path.isfile(material_json_path):
+                    try:
+                        with open(material_json_path, 'r', encoding='utf-8') as f:
+                            material_data = json.load(f)
+                        extracted_files.append(material_data)
+                    except Exception as e:
+                        extracted_files.append({
+                            'quiz_name': dir,
+                            'error': f'Failed to load material.json: {str(e)}'
+                        })
+
         return jsonify(extracted_files), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
