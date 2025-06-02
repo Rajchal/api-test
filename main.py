@@ -324,6 +324,7 @@ def get_material():
 
         for root, dirs, files in os.walk(extract_dir_material):
             for dir in dirs:
+                material_data={}
                 material_json_path = os.path.join(extract_dir_material, dir, 'material.json')
                 if os.path.isfile(material_json_path):
                     try:
