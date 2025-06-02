@@ -313,7 +313,7 @@ def upload_material():
                 os.remove(zip_path)
     return jsonify({'error': 'File type not allowed'}), 400
 
-@app.route('/material', methods=['GET'])
+@app.route('/materials', methods=['GET'])
 def get_material():
     extract_dir_material = './material_uploads'
     if not os.path.exists(extract_dir_material):
