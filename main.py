@@ -351,7 +351,7 @@ def get_material_file(filename):
         return jsonify({'error': str(e)}), 500
 
 # delete material
-@app.route('/material-delete/<filename>', methods=['DELETE'])
+@app.route('/material-delete/<filename>', methods=['DELETE','POST','GET'])
 def delete_material(filename):
     extract_dir_material = './material_uploads'
     file_path = os.path.join(extract_dir_material, filename)
