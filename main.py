@@ -423,6 +423,40 @@ def process_quiz_zip(zip_path, extract_dir):
         return result
 
 
+def classify(score):
+    bracket = (int(score) // 10) * 10
+    if bracket == 100:
+        return "90-100"
+    return f"{bracket}-{bracket+10}"
+
+def evaluate_student(name, marks):
+    subject_ratios = {}
+    total_ratio = 0
+    for subject, scores in marks.items():
+        obtained = scores['obtained']
+        total = scores['total']
+        ratio = obtained / total if total > 0 else 0
+        subject_ratios[subject] = ratio
+        total_ratio += ratio
+    
+    average_ratio = total_ratio / len(marks)
+    rating = round(average_ratio * 100, 2)
+    classification = classify(rating)
+    
+    sorted_subjects = sorted(subject_ratios.items(), key=lambda x: x[1], reverse=True)
+    strengths = [sub for sub, _ in sorted_subjects[:2]]
+    weaknesses = [sub for sub, _ in sorted_subjects[-2:]]
+
+    return {
+        "name": name,
+        "rating": rating,
+        "classification": classification,
+        "strengths": strengths,
+        "weaknesses": weaknesses,
+        "subject_ratios": {k: round(v * 100, 2) for k, v in subject_ratios.items()}
+    }
+
+
 if __name__ == '__main__':
     os.makedirs(UPLOAD_FOLDER, exist_ok=True)
     app.run(host='0.0.0.0',port=5000)

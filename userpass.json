@@ -1,9 +1,9 @@
 {
-    "user1": {
+    "Anjal": {
         "password": "password1",
         "role":"STUDENT"
     },
-    "user2": {
+    "Sachet": {
         "password": "password2",
         "role":"TEACHER"
     }
