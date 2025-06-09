@@ -383,6 +383,31 @@ def delete_material(filename):
         return jsonify({'message': f'File "{filename}" deleted successfully'}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+    
+@app.route('/student-performance', methods={'GET'})
+def student_performance():
+    # Load student data from a JSON file
+    with open("students_data.json", "r") as f:
+        students_data = json.load(f)
+    # array of student name
+    reports = []
+    for student in students_data:
+        reports.append(student)
+
+    return jsonify(reports), 200
+
+@app.route('/student-performance/<student-name>', methods=['POST'])
+def student_performance_detail(student_name):
+    # Load student data from a JSON file
+    with open("students_data.json", "r") as f:
+        students_data = json.load(f)
+
+    student = students_data.get(student_name)
+    if not student:
+        return jsonify({'error': 'Student not found'}), 404
+
+    report = evaluate_student(student_name, student)
+    return jsonify(report), 200
 
 def process_material_zip(zip_path, extract_dir_material):
     """Process the material zip file and extract its contents"""
@@ -455,6 +480,8 @@ def evaluate_student(name, marks):
         "weaknesses": weaknesses,
         "subject_ratios": {k: round(v * 100, 2) for k, v in subject_ratios.items()}
     }
+
+
 
 
 if __name__ == '__main__':
