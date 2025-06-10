@@ -434,7 +434,7 @@ def student_performance_detail(student_name):
 def pdf_to_images_route(pdf_name):
     output_folder = f'./pdfimages/{pdf_name}'
 
-    pdf_path = os.path.join(f'./material_uploads/{pdf_name}/{"_".join(pdf_name.split("-"))}.pdf', 'pdfs')
+    pdf_path = os.path.join(f'./material_uploads/{pdf_name}/{"_".join(pdf_name.split("-"))}.pdf')
     if not pdf_path or not os.path.isfile(pdf_path):
         return jsonify({'error': f'Invalid PDF path: {pdf_path}'}), 400
 
