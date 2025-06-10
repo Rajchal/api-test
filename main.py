@@ -9,8 +9,40 @@ from pdf2image import convert_from_path
 import threading
 
 
+
 app = Flask(__name__)
 CORS(app)
+from app import celery
+
+@celery.task()
+def process_and_convert_zip(zip_content_bytes, original_filename):
+    """
+    This Celery task does all the work in the background.
+    """
+    temp_dir = tempfile.mkdtemp(prefix='material-processing-')
+    try:
+        # Recreate the zip file in the temp dir from bytes
+        zip_path = os.path.join(temp_dir, original_filename)
+        with open(zip_path, 'wb') as f:
+            f.write(zip_content_bytes)
+
+        # Extract
+        with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+            zip_ref.extractall(temp_dir)
+        os.remove(zip_path)
+
+        # Convert
+        output_base_dir = './pdfimages'
+        convert_pdfs_in_background(temp_dir, output_base_dir) # Use the helper from before
+        print("Background task completed successfully.")
+
+    except Exception as e:
+        print(f"Background task failed: {e}")
+        # Add proper logging here
+    finally:
+        # CRITICAL: The background task cleans up after itself.
+        if os.path.exists(temp_dir):
+            shutil.rmtree(temp_dir)
 index_of_question=0
 action={
     'action':'',
@@ -294,63 +326,22 @@ def login():
     else:
         return jsonify({'status': False}), 200
     
+from tasks import process_and_convert_zip
+
 @app.route('/material-upload', methods=['POST'])
-def upload_material():
-    # Check if the post request has the file part
-    if 'file' not in request.files:
-        return jsonify({'error': 'No file part'}), 400
-    
+def upload_material_celery():
+    # ... (file validation logic is the same) ...
     file = request.files['file']
     
-    # If user does not select file, browser submits empty part
-    if file.filename == '':
-        return jsonify({'error': 'No selected file'}), 400
+    # Read the file content into memory. For very large files,
+    # you might save it to a shared temporary location first.
+    file_bytes = file.read()
+    filename = secure_filename(file.filename)
     
-    # Accept common zip mimetypes
-    valid_mimetypes = ['application/zip', 'application/x-zip-compressed', 'application/octet-stream', 'multipart/x-zip']
-    if file and allowed_file(file.filename) and file.mimetype in valid_mimetypes:
-        filename = secure_filename(file.filename)
-        temp_dir = './material_uploads'
-        if not os.path.exists(temp_dir):
-            os.makedirs(temp_dir, exist_ok=True)
-
-        try:
-            # Save the zip file temporarily
-            zip_path = os.path.join(temp_dir, filename)
-            file.save(zip_path)
-            
-            # Process the zip file
-           # result = process_quiz_zip(zip_path, temp_dir)
-
-        except zipfile.BadZipFile:
-            return jsonify({'error': 'Invalid zip file'}), 400
-        except Exception as e:
-            print(f"Error processing material zip: {str(e)}")
-            return jsonify({'error': str(e)}), 500
-        finally:
-            if os.path.exists(zip_path):
-                with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-                    zip_ref.extractall(temp_dir)
-                # Start PDF-to-image conversion in a background thread after returning response
-
-                def convert_pdfs_in_background(temp_dir):
-                    for root, _, files in os.walk(temp_dir):
-                        for file_in_zip in files:
-                            if file_in_zip.lower().endswith('.pdf'):
-                                pdf_path = os.path.join(root, file_in_zip)
-                                output_folder = os.path.join('./pdfimages', os.path.relpath(root, temp_dir))
-                                os.makedirs(output_folder, exist_ok=True)
-                                try:
-                                    pdf_to_images(pdf_path, output_folder)
-                                except Exception as e:
-                                    print(f"Error converting {pdf_path} to images: {e}")
-
-                # Only start the background thread if not already running for this upload
-                threading.Thread(target=convert_pdfs_in_background, args=(temp_dir,), daemon=True).start()
-                os.remove(zip_path)
-        return jsonify({'message': 'File successfully uploaded and processed'}), 200
-    return jsonify({'error': 'File type not allowed or mimetype is not a recognized zip type'}), 400
-
+    # Start the background task and pass the file content
+    process_and_convert_zip.delay(file_bytes, filename)
+    
+    return jsonify({'message': 'File accepted for background processing.'}), 202
 @app.route('/materials', methods=['GET'])
 def get_material():
     extract_dir_material = './material_uploads'
