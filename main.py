@@ -329,17 +329,18 @@ def upload_material():
             return jsonify({'error': str(e)}), 500
         finally:
             if os.path.exists(zip_path):
-            # Unzip the file to the material_uploads directory
-                with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-                    zip_ref.extractall(temp_dir)
-                for root, dirs, files in os.walk(temp_dir):
-                    for file_in_zip in files:
-                        if file_in_zip.lower().endswith('.pdf'):
-                            pdf_path = os.path.join(root, file_in_zip)
-                            output_folder = os.path.join('./pdfimages', os.path.relpath(root, temp_dir))
-                            os.makedirs(output_folder, exist_ok=True)
-                            pdf_to_images(pdf_path, output_folder)
                 os.remove(zip_path)
+        # Unzip the file to the material_uploads directory and convert PDFs after successful upload
+        zip_extract_path = os.path.join(temp_dir, filename[:-4])  # Remove .zip extension for folder
+        with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+            zip_ref.extractall(temp_dir)
+        for root, _, files in os.walk(temp_dir):
+            for file_in_zip in files:
+                if file_in_zip.lower().endswith('.pdf'):
+                    pdf_path = os.path.join(root, file_in_zip)
+                    output_folder = os.path.join('./pdfimages', os.path.relpath(root, temp_dir))
+                    os.makedirs(output_folder, exist_ok=True)
+                    pdf_to_images(pdf_path, output_folder)
         return jsonify({'message': 'File successfully uploaded and processed'}), 200
     return jsonify({'error': 'File type not allowed or mimetype is not a recognized zip type'}), 400
 
