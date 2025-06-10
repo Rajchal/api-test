@@ -443,7 +443,7 @@ def pdf_to_images_route(pdf_name):
 
     try:
         image_paths = pdf_to_images(pdf_path, output_folder)
-        return jsonify({'images': image_paths}), 200
+        return jsonify({'images': image_paths[0],'display': display_bool}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
