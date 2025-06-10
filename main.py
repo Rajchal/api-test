@@ -503,7 +503,7 @@ def evaluate_student(name, marks):
         total_ratio += ratio
     
     average_ratio = total_ratio / len(marks)
-    rating = round(average_ratio * 100, 2)
+    rating = round(average_ratio, 2)
     classification = classify(rating)
     
     sorted_subjects = sorted(subject_ratios.items(), key=lambda x: x[1], reverse=True)
