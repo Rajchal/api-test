@@ -6,6 +6,7 @@ import json
 import shutil
 from flask_cors import CORS
 from pdf2image import convert_from_path
+import threading
 
 
 app = Flask(__name__)
@@ -330,13 +331,21 @@ def upload_material():
             if os.path.exists(zip_path):
                 with zipfile.ZipFile(zip_path, 'r') as zip_ref:
                     zip_ref.extractall(temp_dir)
-                for root, dirs, files in os.walk(temp_dir):
-                    for file_in_zip in files:
-                        if file_in_zip.lower().endswith('.pdf'):
-                            pdf_path = os.path.join(root, file_in_zip)
-                            output_folder = os.path.join('./pdfimages', os.path.relpath(root, temp_dir))
-                            os.makedirs(output_folder, exist_ok=True)
-                            pdf_to_images(pdf_path, output_folder)
+                # Start PDF-to-image conversion in a background thread after returning response
+
+                def convert_pdfs_in_background(temp_dir):
+                    for root, dirs, files in os.walk(temp_dir):
+                        for file_in_zip in files:
+                            if file_in_zip.lower().endswith('.pdf'):
+                                pdf_path = os.path.join(root, file_in_zip)
+                                output_folder = os.path.join('./pdfimages', os.path.relpath(root, temp_dir))
+                                os.makedirs(output_folder, exist_ok=True)
+                                try:
+                                    pdf_to_images(pdf_path, output_folder)
+                                except Exception as e:
+                                    print(f"Error converting {pdf_path} to images: {e}")
+
+                threading.Thread(target=convert_pdfs_in_background, args=(temp_dir,), daemon=True).start()
                 os.remove(zip_path)
         return jsonify({'message': 'File successfully uploaded and processed'}), 200
     return jsonify({'error': 'File type not allowed or mimetype is not a recognized zip type'}), 400
