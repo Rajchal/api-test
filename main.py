@@ -24,6 +24,7 @@ flag={
     'Anjal':True
 }
 quizName = ''
+audio= False
 display_bool = False
 global_question=[]
 # Configuration
@@ -62,7 +63,7 @@ def display_quiz():
 
 @app.route('/update-action', methods=['POST'])
 def update_action():
-    global action, index_of_question, display_bool, flag  # Declare both at the top
+    global action, index_of_question, display_bool, flag ,audio # Declare both at the top
     data = request.get_json()
     if not data or 'action' not in data:
         return jsonify({'error': 'Invalid input, "action" key is required'}), 400
@@ -89,7 +90,11 @@ def update_action():
         global_question.clear()
         flag['Anjal']=True
         flag['Nidhi']=True
-        flag['Sachet']=True        
+        flag['Sachet']=True 
+    elif action['action']=='PLAY':
+        audio=True   
+    elif action['action']=='PAUSE':
+        audio=False    
     return jsonify({'message': 'Action updated successfully', 'action': action}), 200
 
 @app.route('/action', methods=['GET'])
@@ -109,7 +114,7 @@ def to_show_quiz(chapter_name):
     with open(questions_json_path, 'r', encoding='utf-8') as f:
         questions_data = json.load(f)
     global_question=questions_data['questions']
-    return jsonify({'question': global_question[index_of_question], 'display': display_bool}), 200
+    return jsonify({'question': global_question[index_of_question], 'display': display_bool,'audio':audio}), 200
 
 @app.route('/quiz-upload', methods=['POST'])
 def upload_quiz_zip():
