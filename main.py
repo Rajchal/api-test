@@ -334,7 +334,7 @@ def upload_material():
                 # Start PDF-to-image conversion in a background thread after returning response
 
                 def convert_pdfs_in_background(temp_dir):
-                    for root, dirs, files in os.walk(temp_dir):
+                    for root, _, files in os.walk(temp_dir):
                         for file_in_zip in files:
                             if file_in_zip.lower().endswith('.pdf'):
                                 pdf_path = os.path.join(root, file_in_zip)
@@ -345,6 +345,7 @@ def upload_material():
                                 except Exception as e:
                                     print(f"Error converting {pdf_path} to images: {e}")
 
+                # Only start the background thread if not already running for this upload
                 threading.Thread(target=convert_pdfs_in_background, args=(temp_dir,), daemon=True).start()
                 os.remove(zip_path)
         return jsonify({'message': 'File successfully uploaded and processed'}), 200
