@@ -384,7 +384,7 @@ def delete_material(filename):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
     
-@app.route('/student-performance', methods={'GET'})
+@app.route('/student-performance', methods=['GET'])
 def student_performance():
     # Load student data from a JSON file
     with open("students_data.json", "r") as f:
