@@ -396,7 +396,7 @@ def student_performance():
 
     return jsonify(reports), 200
 
-@app.route('/student-performance/<student-name>', methods=['POST'])
+@app.route('/student-performance/<student-name>', methods=['GET'])
 def student_performance_detail(student_name):
     # Load student data from a JSON file
     with open("students_data.json", "r") as f:
