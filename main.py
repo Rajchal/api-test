@@ -5,6 +5,7 @@ import os
 import json
 import shutil
 from flask_cors import CORS
+from pdf2image import convert_from_path
 
 
 app = Flask(__name__)
@@ -115,6 +116,20 @@ def to_show_quiz(chapter_name):
         questions_data = json.load(f)
     global_question=questions_data['questions']
     return jsonify({'question': global_question[index_of_question], 'display': display_bool,'audio':audio}), 200
+
+@app.route('/live-material/<material_name>', methods=['GET'])
+def to_show_material(material_name):
+    folder_path = os.path.join('./material_uploads', material_name)
+    if not os.path.exists(folder_path) or not os.path.isdir(folder_path):
+        return jsonify({'error': f'Folder "{material_name}" not found'}), 404
+    material_json_path = os.path.join(folder_path, 'material.json')
+    if not os.path.isfile(material_json_path):
+        return jsonify({'error': f'"material.json" not found in "{material_name}"'}), 404
+
+    with open(material_json_path, 'r', encoding='utf-8') as f:
+        material_data = json.load(f)
+
+    return jsonify({'material': material_data, 'display': display_bool}), 200
 
 @app.route('/quiz-upload', methods=['POST'])
 def upload_quiz_zip():
@@ -302,9 +317,10 @@ def upload_material():
             # Save the zip file temporarily
             zip_path = os.path.join(temp_dir, filename)
             file.save(zip_path)
+
             
             # Process the zip file
-            # result = process_quiz_zip(zip_path, temp_dir)
+           # result = process_quiz_zip(zip_path, temp_dir)
 
         except zipfile.BadZipFile:
             return jsonify({'error': 'Invalid zip file'}), 400
@@ -316,6 +332,7 @@ def upload_material():
             # Unzip the file to the material_uploads directory
                 with zipfile.ZipFile(zip_path, 'r') as zip_ref:
                     zip_ref.extractall(temp_dir)
+                pdf_to_images(zip_path, f'./pdfimages/{temp_dir}')
                 os.remove(zip_path)
         return jsonify({'message': 'File successfully uploaded and processed'}), 200
     return jsonify({'error': 'File type not allowed or mimetype is not a recognized zip type'}), 400
@@ -414,26 +431,6 @@ def student_performance_detail(student_name):
     report = evaluate_student(student_name, student)
     return jsonify(report), 200
 
-def process_material_zip(zip_path, extract_dir_material):
-    """Process the material zip file and extract its contents"""
-    with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-        # Extract all files
-        zip_ref.extractall(extract_dir_material)
-        
-        # Look for specific files in the zip
-        extracted_files = zip_ref.namelist()
-        
-        result = {
-            'files': extracted_files,
-            'media_files': []
-        }
-        
-        for file in extracted_files:
-            if file.endswith(('.mp4', '.jpg', '.png', '.pdf')):
-                result['media_files'].append(file)
-        
-        return result
-
 def process_quiz_zip(zip_path, extract_dir):
     """Process the quiz zip file and extract its contents"""
     with zipfile.ZipFile(zip_path, 'r') as zip_ref:
@@ -486,6 +483,15 @@ def evaluate_student(name, marks):
         "subject_ratios": {k: round(v * 100, 2) for k, v in subject_ratios.items()}
     }
 
+def pdf_to_images(pdf_path, output_folder):
+    # Convert PDF to a list of PIL images
+    images = convert_from_path(pdf_path)
+    image_paths = []
+    for i, image in enumerate(images):
+        image_path = os.path.join(output_folder, f'page_{i+1}.png')
+        image.save(image_path, 'PNG')
+        image_paths.append(image_path)
+    return image_paths
 
 
 
