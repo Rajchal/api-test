@@ -435,14 +435,14 @@ def pdf_to_images_route(pdf_name):
     output_folder = f'./pdfimages/{pdf_name}'
 
     pdf_path = os.path.join(f'./material_uploads/{pdf_name}')
-    if not pdf_path or not os.path.isfile(pdf_path):
+    if not pdf_path or not os.path.isdir(pdf_path):
         return jsonify({'error': 'Invalid PDF path'}), 400
 
     if not os.path.exists(output_folder):
         os.makedirs(output_folder, exist_ok=True)
 
     try:
-        image_paths = pdf_to_images(pdf_path, output_folder)
+        image_paths = pdf_to_images(f'{pdf_path}/{pdf_name}.pdf', output_folder)
         return jsonify({'images': image_paths}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
