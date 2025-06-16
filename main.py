@@ -475,6 +475,11 @@ def mic_action():
         # Stop the process if it's running
         if mic_process is not None and mic_process.poll() is None:
             mic_process.terminate()
+            try:
+                mic_process.wait(timeout=5)
+            except subprocess.TimeoutExpired:
+                mic_process.kill()
+                mic_process.wait()
             mic_process = None
 
     return jsonify({'message': 'Mic action processed successfully'}), 200
