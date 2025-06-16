@@ -5,7 +5,7 @@ import os
 import json
 import shutil
 from flask_cors import CORS
-from pdf2image import convert_from_path
+
 
 
 app = Flask(__name__)
@@ -92,10 +92,6 @@ def update_action():
         flag['Anjal']=True
         flag['Nidhi']=True
         flag['Sachet']=True 
-    elif action['action']=='PLAY':
-        audio=True   
-    elif action['action']=='PAUSE':
-        audio=False    
     return jsonify({'message': 'Action updated successfully', 'action': action}), 200
 
 @app.route('/action', methods=['GET'])
