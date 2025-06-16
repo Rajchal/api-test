@@ -25,7 +25,6 @@ flag={
     'Anjal':True
 }
 quizName = ''
-audio= False
 display_bool = False
 global_question=[]
 # Configuration
@@ -113,19 +112,6 @@ def to_show_quiz(chapter_name):
     global_question=questions_data['questions']
     return jsonify({'question': global_question[index_of_question], 'display': display_bool,'audio':audio}), 200
 
-@app.route('/live-material/<material_name>', methods=['GET'])
-def to_show_material(material_name):
-    folder_path = os.path.join('./material_uploads', material_name)
-    if not os.path.exists(folder_path) or not os.path.isdir(folder_path):
-        return jsonify({'error': f'Folder "{material_name}" not found'}), 404
-    material_json_path = os.path.join(folder_path, 'material.json')
-    if not os.path.isfile(material_json_path):
-        return jsonify({'error': f'"material.json" not found in "{material_name}"'}), 404
-
-    with open(material_json_path, 'r', encoding='utf-8') as f:
-        material_data = json.load(f)
-
-    return jsonify({'material': material_data, 'display': display_bool}), 200
 
 @app.route('/quiz-upload', methods=['POST'])
 def upload_quiz_zip():
