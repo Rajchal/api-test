@@ -94,8 +94,7 @@ def update_action():
 
         with open(questions_json_path, 'r', encoding='utf-8') as f:
             questions_data = json.load(f)
-        num_ques=len(questions_data['questions'])
-        subject=questions_data['subject']
+        subject=questions_data['quiz']
         # Save scores to students_data.json
         students_data_path = os.path.join(os.path.dirname(__file__), 'students_data.json')
         if os.path.exists(students_data_path):
@@ -108,8 +107,8 @@ def update_action():
             if student not in students_data:
                 students_data[student] = {}
             # Add or update the quiz score
-            students_data[student][subject]['obtained'] += score
-            students_data[student][subject]['total'] += num_ques  # Assuming each quiz is out of 10
+            students_data[student][subject['subject']]['obtained'] += score
+            students_data[student][subject['subject']]['total'] += subject['questionCount']  # Assuming each quiz is out of 10
 
 
         with open(students_data_path, 'w', encoding='utf-8') as f:
