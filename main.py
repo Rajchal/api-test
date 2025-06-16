@@ -83,7 +83,28 @@ def update_action():
         index_of_question = 0
         flag['Anjal']=True
         flag['Nidhi']=True
-        flag['Sachet']=True   
+        flag['Sachet']=True
+        # Save scores to students_data.json
+        students_data_path = os.path.join(os.path.dirname(__file__), 'students_data.json')
+        if os.path.exists(students_data_path):
+            with open(students_data_path, 'r', encoding='utf-8') as f:
+                students_data = json.load(f)
+        else:
+            students_data = {}
+
+        for student, score in scores.items():
+            if student not in students_data:
+                students_data[student] = {}
+            # Add or update the quiz score
+            students_data[student][quizName.split('-')[1]]['obtained'] += score
+            students_data[student][quizName.split('-')[1]]['total'] = students_data[student][quizName.split('-')[1]].get('total', 0) + 1
+
+
+        with open(students_data_path, 'w', encoding='utf-8') as f:
+            json.dump(students_data, f, indent=2)
+        scores['Nidhi'] = 0
+        scores['Sachet'] = 0
+        scores['Anjal'] = 0  
     elif action['action']=='EXIT':
         display_bool = False
         index_of_question = 0
@@ -92,6 +113,9 @@ def update_action():
         flag['Anjal']=True
         flag['Nidhi']=True
         flag['Sachet']=True 
+        scores['Nidhi'] = 0
+        scores['Sachet'] = 0
+        scores['Anjal'] = 0
     return jsonify({'message': 'Action updated successfully', 'action': action}), 200
 
 @app.route('/action', methods=['GET'])
@@ -240,7 +264,8 @@ def submit_answer():
     quest=global_question[index_of_question]
 
     if int(answer)== quest['correctOptionIndex'] and flag[student]:
-        scores[student]+=1
+        scores[student] += 1
+
         flag[student]==False
 
     return jsonify({'status': 'success', 'answer': answer,'student':student}), 200
