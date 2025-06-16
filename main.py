@@ -84,6 +84,18 @@ def update_action():
         flag['Anjal']=True
         flag['Nidhi']=True
         flag['Sachet']=True
+
+        folder_path = os.path.join('./uploads', quizName)
+        if not os.path.exists(folder_path) or not os.path.isdir(folder_path):
+            return jsonify({'error': f'Folder "{quizName}" not found'}), 404
+        questions_json_path = os.path.join(folder_path, 'questions.json')
+        if not os.path.isfile(questions_json_path):
+            return jsonify({'error': f'"questions.json" not found in "{quizName}"'}), 404
+
+        with open(questions_json_path, 'r', encoding='utf-8') as f:
+            questions_data = json.load(f)
+        num_ques=len(questions_data['questions'])
+        subject=questions_data['subject']
         # Save scores to students_data.json
         students_data_path = os.path.join(os.path.dirname(__file__), 'students_data.json')
         if os.path.exists(students_data_path):
@@ -96,12 +108,13 @@ def update_action():
             if student not in students_data:
                 students_data[student] = {}
             # Add or update the quiz score
-            students_data[student][quizName.split('-')[1]]['obtained'] += score
-            students_data[student][quizName.split('-')[1]]['total'] = students_data[student][quizName.split('-')[1]].get('total', 0) + 1
+            students_data[student][subject]['obtained'] += score
+            students_data[student][subject]['total'] += num_ques  # Assuming each quiz is out of 10
 
 
         with open(students_data_path, 'w', encoding='utf-8') as f:
             json.dump(students_data, f, indent=2)
+
         scores['Nidhi'] = 0
         scores['Sachet'] = 0
         scores['Anjal'] = 0  
@@ -135,7 +148,7 @@ def to_show_quiz(chapter_name):
     with open(questions_json_path, 'r', encoding='utf-8') as f:
         questions_data = json.load(f)
     global_question=questions_data['questions']
-    return jsonify({'question': global_question[index_of_question], 'display': display_bool,'audio':audio}), 200
+    return jsonify({'question': global_question[index_of_question], 'display': display_bool}), 200
 
 
 @app.route('/quiz-upload', methods=['POST'])
