@@ -500,16 +500,6 @@ def evaluate_student(name, marks):
         "subject_ratios": {k: round(v * 100, 2) for k, v in subject_ratios.items()}
     }
 
-def pdf_to_images(pdf_path, output_folder):
-    # Convert PDF to a list of PIL images
-    images = convert_from_path(pdf_path)
-    image_paths = []
-    for i, image in enumerate(images):
-        image_path = os.path.join(output_folder, f'page_{i+1}.png')
-        image.save(image_path, 'PNG')
-        image_paths.append(image_path)
-    return image_paths
-
 
 
 if __name__ == '__main__':
