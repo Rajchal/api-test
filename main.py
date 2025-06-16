@@ -5,6 +5,7 @@ import os
 import json
 import shutil
 from flask_cors import CORS
+import subprocess
 
 
 
@@ -412,7 +413,33 @@ def student_performance_detail(student_name):
     report = evaluate_student(student_name, student)
     return jsonify(report), 200
 
+# Add a global variable to keep track of the process
+mic_process = None
 
+@app.route('/mic-action', methods=['POST'])
+def mic_action():
+    global mic_process
+    data = request.get_json()
+    if not data or 'mic_on' not in data:
+        return jsonify({'error': 'Invalid request'}), 400
+
+    mic_on = data['mic_on']
+    if mic_on:
+        # Start the microphone and run the script
+        script_dir = '../test'  # Change this to your script directory
+        venv_path = '../myenv/bin/activate'  # Change this to your venv activate script
+        script_to_run = 'main.py'               # Change this to your script name
+
+        # Build the command to activate venv and run the script
+        command = f"cd {script_dir} && source {venv_path} && python {script_to_run}"
+        mic_process = subprocess.Popen(command, shell=True, executable='/bin/bash')
+    else:
+        # Stop the process if it's running
+        if mic_process is not None and mic_process.poll() is None:
+            mic_process.terminate()
+            mic_process = None
+
+    return jsonify({'message': 'Mic action processed successfully'}), 200
 
 def process_material_zip(zip_path, extract_dir_material):
     """Process the material zip file and extract its contents"""
